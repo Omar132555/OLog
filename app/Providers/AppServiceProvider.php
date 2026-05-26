@@ -8,6 +8,7 @@ use App\Models\Post;
 use App\Models\User;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -27,7 +28,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::useBootstrapFive();
-        $categories = Category::take(5)->get();
+        if (Schema::hasTable('categories')) {
+            $categories = Category::take(5)->get();
+        }
         View::share('categories', $categories);
         Gate::define('edit-post', function (User $user, Post $post) {
             return $post->user->is($user);
