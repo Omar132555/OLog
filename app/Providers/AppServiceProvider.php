@@ -28,13 +28,23 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::useBootstrapFive();
-        if (Schema::hasTable('categories')) {
-            $categories = Category::take(5)->get();
+
+        $categories = collect();
+
+        try {
+            if (Schema::hasTable('categories')) {
+                $categories = Category::take(5)->get();
+            }
+        } catch (\Throwable $e) {
+            $categories = collect();
         }
+
         View::share('categories', $categories);
+
         Gate::define('edit-post', function (User $user, Post $post) {
             return $post->user->is($user);
         });
+
         Gate::define('delete-comment', function (User $user, Comment $comment) {
             return $comment->user_id === $user->id
                 || $comment->post->user_id === $user->id;
